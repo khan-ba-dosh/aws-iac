@@ -1,0 +1,37 @@
+def ENVIRONMENT = params.Environment
+def DESTROY = params.Destroy
+
+node {
+
+    stage('WorkSpace CleanUp') {
+      step([$class: 'WsCleanup'])
+    }
+
+
+    stage('Deploy') {
+       
+
+        if (ENVIRONMENT == 'QA' && DESTROY == 'false') {
+          withCredentials([string(credentialsId: 'AWS_AK', variable: 'AWS_AK'), string(credentialsId: 'AWS_SK', variable: 'AWS_SK') ]) {
+            sh "sudo sed -i 's/AWS_AK/${AWS_AK}/g' variables.tf"
+            sh "sudo sed -i 's/AWS_SK/${AWS_SK}/g' variables.tf"
+            sh "terraform init"
+            sh "terraform plan"
+            sleep 50
+          }
+        } 
+        else if (ENVIRONMENT == 'PRD' && DESTROY == 'false') {
+          withCredentials([string(credentialsId: 'AWS_AK', variable: 'AWS_AK'), string(credentialsId: 'AWS_SK', variable: 'AWS_SK') ]) {
+            sh "sudo sed -i 's/AWS_AK/${AWS_AK}/g' variables.tf"
+            sh "sudo sed -i 's/AWS_SK/${AWS_SK}/g' variables.tf"
+            sh "terraform init"
+            sh "terraform plan"
+            sleep 50
+          }
+        } 
+        else {
+          ENVIRONMENT = "EnvironmentNotSet"
+        }  
+  }
+
+}
